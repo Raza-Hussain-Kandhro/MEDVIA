@@ -1,9 +1,9 @@
 {
-  "name": "biova-surgical-backend",
+  "name": "medvia-api",
   "version": "1.0.0",
-  "description": "This is the backend for biova surgical site for selling medical related equipments",
+  "description": "Backend API for MEDVIA, a medical equipment e-commerce site",
   "license": "ISC",
-  "author": "MUSTAFA MUBASHIR",
+  "author": "Raza Hussain",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
