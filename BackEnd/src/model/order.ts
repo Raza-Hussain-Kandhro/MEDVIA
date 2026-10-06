@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import { Schema, model } from 'mongoose'
 
-const OrderSchema = new mongoose.Schema({
+const OrderSchema = new Schema({
   firstName: String,
   lastName: String,
   email: String,
@@ -18,13 +18,12 @@ const OrderSchema = new mongoose.Schema({
       title: String,
       price: Number,
       quantity: Number,
-      product_images: [String]
-    }
+      product_images: [String],
+    },
   ],
   totalPrice: Number,
-  createdAt: { type: Date, default: Date.now }
-});
+  createdAt: { type: Date, default: Date.now },
+})
 
-const Order = mongoose.model("Order", OrderSchema);
-
-module.exports = Order;
+const Order = model('Order', OrderSchema)
+export default Order
