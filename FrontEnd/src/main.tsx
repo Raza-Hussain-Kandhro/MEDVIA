@@ -7,4 +7,10 @@ import store from './redux/store'
 
 const el = document.getElementById('root')
 if (!el) throw new Error('Root element not found')
-createRoot(el).render(<StrictMode><Provider store={store}><App /></Provider></StrictMode>)
+createRoot(el).render(
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>,
+)

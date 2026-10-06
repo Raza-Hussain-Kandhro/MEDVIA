@@ -23,9 +23,13 @@ function WhatsAppButton() {
   const { pathname } = useLocation()
   if (pathname === '/your-cart') return null
   return (
-    <a href="https://wa.me/923054440378" aria-label="Chat with MEDVIA on WhatsApp"
-      className="fixed bottom-4 right-4 z-30 flex min-h-12 items-center gap-2 rounded-full bg-brand px-4 font-semibold text-on-brand shadow-md hover:bg-brand-strong">
-      <MessageCircle size={22} strokeWidth={2} aria-hidden="true" /><span className="hidden sm:inline">WhatsApp</span>
+    <a
+      href="https://wa.me/923054440378"
+      aria-label="Chat with MEDVIA on WhatsApp"
+      className="fixed bottom-4 right-4 z-30 flex min-h-12 items-center gap-2 rounded-full bg-brand px-4 font-semibold text-on-brand shadow-md hover:bg-brand-strong"
+    >
+      <MessageCircle size={22} strokeWidth={2} aria-hidden="true" />
+      <span className="hidden sm:inline">WhatsApp</span>
     </a>
   )
 }
@@ -33,7 +37,12 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
   return (
     <BrowserRouter>
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">Skip to content</a>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2"
+      >
+        Skip to content
+      </a>
       <ScrollToTop />
       <Navbar setSearchQuery={setSearchQuery} />
       <Routes>

@@ -15,6 +15,5 @@ export default tseslint.config(
       '@typescript-eslint/ban-ts-comment': 'error',
     },
   },
-  { files: ['*.js'], languageOptions: { globals: globals.node } },
   prettier,
 )

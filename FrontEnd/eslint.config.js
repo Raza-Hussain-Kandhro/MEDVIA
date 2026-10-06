@@ -20,6 +20,11 @@ export default tseslint.config(
       '@typescript-eslint/ban-ts-comment': 'error',
     },
   },
+  {
+    // These files export small helpers next to components on purpose. Fast refresh is a dev-only convenience.
+    files: ['src/components/ui.tsx', 'src/components/BlogCard.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
   { files: ['*.js'], languageOptions: { globals: globals.node } },
   prettier,
 )

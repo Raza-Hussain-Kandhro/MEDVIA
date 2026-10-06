@@ -1,7 +1,12 @@
 import 'dotenv/config'
 
 const csv = (value: string | undefined, fallback: string[]): string[] =>
-  value ? value.split(',').map((s) => s.trim()).filter(Boolean) : fallback
+  value
+    ? value
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : fallback
 
 export const config = {
   port: Number(process.env.PORT ?? 8000),
