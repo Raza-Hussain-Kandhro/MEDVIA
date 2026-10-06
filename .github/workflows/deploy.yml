@@ -1,0 +1,105 @@
+name: Deploy
+
+# Runs only after the CI workflow has finished. A failed CI run never reaches the deploy jobs,
+# which is the cross-workflow equivalent of `needs: ci`.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  preview:
+    name: Preview deploy
+    # Same-repository pull requests only. Forks never receive the Vercel secrets.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: deploy-preview-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Short commit SHA
+        id: sha
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: echo "short=${SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel settings
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VITE_COMMIT_SHA: ${{ steps.sha.outputs.short }}
+      - name: Deploy
+        id: deploy
+        run: echo "url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
+      - name: Comment the preview URL on the pull request
+        uses: actions/github-script@v8
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+          SHORT_SHA: ${{ steps.sha.outputs.short }}
+        with:
+          script: |
+            const pr = context.payload.workflow_run.pull_requests[0]
+            if (!pr) {
+              core.warning('No pull request is linked to this run.')
+              return
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `Preview ready: ${process.env.PREVIEW_URL}\nCommit: \`${process.env.SHORT_SHA}\` (shown in the site footer)`,
+            })
+
+  production:
+    name: Production deploy
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Short commit SHA
+        id: sha
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: echo "short=${SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel settings
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VITE_COMMIT_SHA: ${{ steps.sha.outputs.short }}
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
